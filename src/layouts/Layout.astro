@@ -1,6 +1,6 @@
 ---
-import '../styles/global.css'; 
-import '@fontsource-variable/inter/opsz.css';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
 ---
 
 <!doctype html>
@@ -12,19 +12,10 @@ import '@fontsource-variable/inter/opsz.css';
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
 	</head>
-	<body>
-		<div class="mx-auto max-w-screen-md px-5">
+	<body class="bg-main text-main min-h-screen font-sans w-full">
+		<div class="grow mx-auto py-10 px-6 max-w-3xl space-y-4">
 			<slot />
 		</div>
 	</body>
 </html>
 
-<style>
-	html,
-	body {
-		margin: 6px;
-		width: 100%;
-		height: 100%;
-		font-family: 'Inter Variable', sans-serif;
-	}
-</style>

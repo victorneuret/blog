@@ -1,0 +1,198 @@
+---
+title: Mock mongo-go-driver
+description: mongo-go-driver contain an undocumented possibility to mock your database. This article aim to explain how to test your database code without running an instance of MongoDB. 👀
+pubDate: 2021/06/23
+author: Victor Neuret
+---
+
+> This article was originally posted on [medium](https://medium.com/@victor.neuret/mocking-the-official-mongo-golang-driver-5aad5b226a78).
+
+# Mock mongo-go-driver
+
+mongo-go-driver contain an undocumented possibility to mock your database. This article aim to explain how to test your database code without running an instance of MongoDB. :eyes:
+
+## Why did I use the undocumented mongo-go-driver mock feature?
+
+I was looking at a possibility to mock MongoDB to write unit tests for the Go service I was working on.
+
+Two solutions were available:
+
+- Use mockgen but having to refactor all my code to match the interface required to generate the mock
+- Give a try to the integrated mocking feature
+
+I went for the second solution which seems, at first, simpler. The mock feature wasn't documented but I least I had a few examples. What felt weird was that no one was using it on the open-source community expect from the mongo-go-driver tests.
+
+![Gopher brining packages.](https://cdn-images-1.medium.com/max/1600/0*llG4tuBp44wLATwX)
+
+Let's get started!
+
+## The basics
+
+The mock feature is available in the go.[mongodb.org/mongo-driver/mongo/integration/mtest](mongodb.org/mongo-driver/mongo/integration/mtest) package.
+
+First of all, you need to create the mongo test instance:
+
+```go
+mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
+defer mt.Close()
+
+```
+
+Then create your sub test run instance with mt.Run. The test is written in the callback function parameter:
+
+```go
+mt.Run("test name", func(mt *mtest.T) { // test code })
+```
+
+Inside the **mt.Run** callback, **mt.Coll** contain the mocked collection that need to be called inside your tested function instead of the usual connected collection. Using this collection allows us to create our mock responses before making the database call.
+
+## Create the mock responses
+
+```go
+func (t *T) AddMockResponses(responses ...bson.D)
+```
+
+**AddMockResponses** is the 'magic' function. The given bson.D will be returned from the mongo to the driver. This is where the tricky part start. With the mocking feature of the mongo-go-driver, you can't directly set the return value of a given function such as InsertOne or FindOne. You need to set the return value of mongo to the driver.
+The content and formatting of this data are described below.
+
+### Single success response
+
+A single success response is composed of a bson.D staring with `{"ok", 1}`.
+
+```go
+bson.D{
+   {"ok", 1},
+   {"key", "value"},
+   etc..
+}
+```
+
+A function to create a single success response is available. It will add the `{"ok", 1}` value at the beginning of the returned bson.D. It take a variadic number of bson.E wich is simply the key value pair of a bson.D.
+
+```go
+func CreateSuccessResponse(elems ...bson.E) bson.D {}
+mt.AddMockResponses(mtest.CreateSuccessResponse(
+   bson.D{{"key", "value"}}...))
+```
+
+### Cursor success response
+
+Mostly for the functions returning a **Cursor** (Find), the driver receives a cursor response from mongo. A cursor a composed of a first batch and the next batches. Each batch containing some data on bson.D format. We also need to create the end of the cursor. A function to create a cursor is available in the driver.
+Here is an example of the creation of a cursor with two values, and the mock response:
+
+```go
+find := mtest.CreateCursorResponse(
+   1,
+   "DBName.CollectionName",
+   mtest.FirstBatch,
+   bsonD1)
+getMore := mtest.CreateCursorResponse(
+   1,
+   "DBName.CollectionName",
+   mtest.NextBatch,
+   bsonD2)
+killCursors := mtest.CreateCursorResponse(
+   0,
+   "DBName.CollectionName",
+   mtest.NextBatch)
+mt.AddMockResponses(find, getMore, killCursors)
+```
+
+### Write error response
+
+To test some error cases, a write error response needs to be mocked as well. The function **CreateWriteErrorsResponse** exists for that purpose. It takes a **mtest.WriteError** struct as parameter.
+Here is an example for a duplicate error:
+
+```go
+mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{
+   Index:   1,
+   Code:    11000,
+   Message: "duplicate key error",
+}))
+```
+
+### Simple error
+
+To simulate any kind of error, the easiest way is to set `{"ok", 0}`.
+
+```go
+mt.AddMockResponses(bson.D{{"ok", 0}})
+```
+
+## Testing the basic cases
+
+### InsertOne
+
+InsertOne require only a success response.
+
+```go
+mt.AddMockResponses(mtest.CreateSuccessResponse())
+```
+
+### InsertMany
+
+Similarly to InsertOne, InsertMany only require a success response.
+
+```go
+mt.AddMockResponses(mtest.CreateSuccessResponse())
+```
+
+### FindOne
+
+FindOne require a simple cursor response composed of one batch.
+
+```go
+mt.AddMockResponses(mtest.CreateCursorResponse(1, "foo.bar", mtest.FirstBatch, bson.D{// our data}))
+```
+
+### Find
+
+Find require a cursor response with one or multiple batches and an end of the cursor.
+
+```go
+first := mtest.CreateCursorResponse(1, "foo.bar", mtest.FirstBatch, bson.D{// our data})
+getMore := mtest.CreateCursorResponse(1, "foo.bar", mtest.NextBatch, bson.D{// our data})
+killCursors := mtest.CreateCursorResponse(0, "foo.bar", mtest.NextBatch)
+mt.AddMockResponses(first, getMore, killCursors)
+```
+
+### FindOneAndUpdate
+
+FindOneAndUpdate need of format of data which the driver does not provide a function to create. Our updated data need to be put as the value of que **"value"** key after a `{"ok", 1}`.
+
+```go
+mt.AddMockResponses(bson.D{
+   {"ok", 1},
+   {"value", bson.D{// our data }},
+}
+```
+
+### Upsert
+
+Same as [FindOneAndUpdate](#FindOneAndUpdate).
+
+### FindOneAndDelete
+
+Same as [FindOneAndUpdate](#FindOneAndUpdate).
+
+### DeleteOne
+
+DeleteOne also have a different format of data that couldn't be created with a function from the driver. It is composed of an acknowledged field and a n field. As described in the [official documentation of DeleteOne](https://www.mongodb.com/docs/manual/reference/method/db.collection.deleteOne/):
+
+> A boolean `acknowledged` as `true` if the operation ran with write concern or `false` if write concern was disabled
+>
+> `deletedCount` containing the number of deleted documents
+
+In our case, the deletedCount is n.
+
+```go
+mt.AddMockResponses(bson.D{{"ok", 1}, {"acknowledged", true}, {"n", 1}})
+```
+
+---
+
+With all of these informations, you should be able to mock your MongoDB calls easily. 👏
+
+I Hope this article could have helped you!
+
+The example code is available on my [GitHub repository](https://github.com/victorneuret/mongo-go-driver-mock).

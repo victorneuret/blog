@@ -1,5 +1,7 @@
 ---
-import { render, getCollection } from 'astro:content';
+import { TypographyA, TypographyBlockquote, TypographyCode, TypographyH1, TypographyH2, TypographyH3, TypographyH4, TypographyList, TypographyP } from '@/components/typography/typography';
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -14,4 +16,16 @@ const { Content } = await render(post);
 ---
 <p>Published on: {post.data.pubDate.toDateString()}</p>
 <p>By: {JSON.stringify(post.data.author)}</p>
-<Content />
+<Layout>
+  <Content  components={{
+    h1: TypographyH1,
+    h2: TypographyH2,
+    h3: TypographyH3,
+    h4: TypographyH4,
+    p: TypographyP,
+    a: TypographyA,
+    ul: TypographyList,
+    blockquote: TypographyBlockquote,
+    code: TypographyCode
+  }}/>
+</Layout>

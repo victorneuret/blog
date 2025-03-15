@@ -1,7 +1,10 @@
 // @ts-check
-import { defineConfig } from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
+import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
+import tailwindcss from "@tailwindcss/vite";
+import expressiveCode from "astro-expressive-code";
+import { defineConfig } from "astro/config";
+import remarkGemoji from "remark-gemoji";
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,5 +12,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  integrations: [react()],
+  integrations: [react(), expressiveCode({ themes: ["github-light"] }), mdx()],
+
+  markdown: {
+    remarkPlugins: [remarkGemoji],
+  },
 });
