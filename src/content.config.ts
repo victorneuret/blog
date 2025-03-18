@@ -1,6 +1,6 @@
-import { defineCollection, reference, z } from "astro:content";
+import { defineCollection, z } from "astro:content";
 
-import { glob, type LoaderContext } from "astro/loaders";
+import { glob } from "astro/loaders";
 
 const blog = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "./src/content/blog" }),
@@ -8,15 +8,8 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    author: reference("authors"),
+    author: z.string(),
   }),
 });
 
-const authors = defineCollection({
-  loader: glob({ pattern: "**/*.json", base: "./src/content/authors" }),
-  schema: z.object({
-    name: z.string(),
-  }),
-});
-
-export const collections = { blog, authors };
+export const collections = { blog };
