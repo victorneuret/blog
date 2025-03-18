@@ -19,4 +19,4 @@ const authors = defineCollection({
   }),
 });
 
-export const collections = { blog };
+export const collections = { blog, authors };
