@@ -1,13 +1,8 @@
 ---
 import { TypographyA, TypographyBlockquote, TypographyCode, TypographyH1, TypographyH2, TypographyH3, TypographyH4, TypographyList, TypographyMuted, TypographyP, TypographySmall } from '@/components/typography/typography';
 import { dateToDisplayString } from '@/lib/utils';
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-
-interface BlogItem {
-  post: CollectionEntry<"blog">;
-  author: CollectionEntry<"authors">[];
-}
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -23,11 +18,11 @@ const { Content } = await render(post);
 ---
 <Layout>
   <TypographyH1>{post.data.title}</TypographyH1>
-  <div class="flex justify-start gap-2 items-center">
+  <div class="flex justify-start gap-2 items-center mb-14">
     <TypographyMuted>{dateToDisplayString(post.data.pubDate)}</TypographyMuted>
     <TypographyMuted>{' - '}</TypographyMuted>
     <TypographySmall>{post.data.author}</TypographySmall>
-    </div>
+  </div>
   <Content  components={{
     h1: TypographyH1,
     h2: TypographyH2,
@@ -38,5 +33,5 @@ const { Content } = await render(post);
     ul: TypographyList,
     blockquote: TypographyBlockquote,
     code: TypographyCode
-  }}/>
+  }} />
 </Layout>

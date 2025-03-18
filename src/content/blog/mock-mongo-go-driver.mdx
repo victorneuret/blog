@@ -5,6 +5,8 @@ pubDate: 2021/06/23
 author: Victor Neuret
 ---
 
+import FullscreenImageViewer from "../../components/FullscreenImageViewer";
+
 > This article was originally posted on [medium](https://medium.com/@victor.neuret/mocking-the-official-mongo-golang-driver-5aad5b226a78).
 
 mongo-go-driver contain an undocumented possibility to mock your database. This article aim to explain how to test your database code without running an instance of MongoDB. :eyes:
@@ -20,7 +22,12 @@ Two solutions were available:
 
 I went for the second solution which seems, at first, simpler. The mock feature wasn't documented but I least I had a few examples. What felt weird was that no one was using it on the open-source community expect from the mongo-go-driver tests.
 
-![Gopher brining packages.](https://cdn-images-1.medium.com/max/1600/0*llG4tuBp44wLATwX)
+<FullscreenImageViewer
+  client:load
+  src="/assets/mock-mongo-go-driver/gopher-package.png"
+  alt="My awesome image"
+  className="w-[80%] mx-auto"
+/>
 
 Let's get started!
 
