@@ -10,11 +10,25 @@ import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://complexity-downward.com",
+  base: "/",
   vite: {
     plugins: [tailwindcss()],
   },
 
-  integrations: [react(), expressiveCode({ themes: ["github-light"] }), mdx()],
+  integrations: [
+    react(),
+    expressiveCode({
+      themes: ["github-light", "github-dark-dimmed"],
+      themeCssSelector: (theme) => {
+        if (theme.name === "github-dark-dimmed") {
+          return "html.dark, html[data-theme='dark']";
+        }
+        return false;
+      },
+    }),
+    mdx(),
+  ],
 
   markdown: {
     remarkPlugins: [remarkGemoji],
