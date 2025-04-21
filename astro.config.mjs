@@ -3,7 +3,7 @@ import mdx from "@astrojs/mdx";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import expressiveCode from "astro-expressive-code";
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import remarkGemoji from "remark-gemoji";
 
 import vercel from "@astrojs/vercel";
@@ -18,6 +18,16 @@ export default defineConfig({
 
   markdown: {
     remarkPlugins: [remarkGemoji],
+  },
+
+  experimental: {
+    fonts: [
+      {
+        provider: fontProviders.fontsource(),
+        name: "Inter",
+        cssVariable: "--font-inter",
+      },
+    ],
   },
 
   adapter: vercel(),

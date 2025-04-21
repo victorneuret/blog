@@ -1,5 +1,5 @@
 ---
-import '@fontsource-variable/inter';
+import { Font } from 'astro:assets';
 import '../styles/global.css';
 ---
 
@@ -11,6 +11,7 @@ import '../styles/global.css';
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
+		<Font cssVariable="--font-inter" preload />
 	</head>
 	<body class="bg-main text-main min-h-screen font-sans w-full">
 		<div class="grow mx-auto py-10 px-6 max-w-3xl space-y-4">
