@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/rss.xml*",
+      "source": "/rss.xml",
       "headers": [
         {
           "key": "Content-Type",
