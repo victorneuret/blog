@@ -15,7 +15,7 @@ export const siteConfig = {
     },
     {
       text: "linkedin",
-      href: "https://www.linkedin.com/in/victorneuret/",
+      href: "https://www.linkedin.com/in/victor-neuret/",
     },
   ],
 };

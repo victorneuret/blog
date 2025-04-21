@@ -1,9 +1,8 @@
 ---
 import { Font } from 'astro:assets';
 import '../styles/global.css';
-import Header from '../components/Header';
-import { ModeToggle } from '@/components/ModeToggle';
-
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 ---
 
 <script is:inline>
@@ -45,6 +44,7 @@ import { ModeToggle } from '@/components/ModeToggle';
 		<div class="grow mx-auto py-10 px-6 max-w-3xl space-y-4">
 			<Header pathname={Astro.url.pathname} client:load />
 			<slot />
+			<Footer />	
 		</div>
 	</body>
 </html>
