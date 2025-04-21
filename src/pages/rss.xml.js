@@ -23,6 +23,7 @@ export async function GET(context) {
   return new Response(feed.body, {
     headers: {
       "Content-Type": "application/xml",
+      "X-Content-Type-Options": "nosniff",
       "Content-Disposition": "inline; filename=rss.xml",
     },
   });

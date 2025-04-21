@@ -14,7 +14,7 @@ export default function Header({ pathname }: { pathname: string }) {
         </TypographyH2>
       </a>
       <div className="flex items-center gap-4">
-        <nav className="mr-2">
+        <nav className="mr-3">
           {siteConfig.headerNavLinks.map((link) => (
             <a
               href={link.href}
