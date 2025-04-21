@@ -24,7 +24,7 @@ export async function GET(context) {
     headers: {
       "Content-Type": "application/xml",
       "X-Content-Type-Options": "nosniff",
-      "Content-Disposition": "inline",
+      "Content-Disposition": "inline; filename=rss.xml",
     },
   });
 }
